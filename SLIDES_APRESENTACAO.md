@@ -127,39 +127,58 @@
 
 ---
 
-## SLIDE 8: Por que o Perceptron e não o MLP? (Tempo: ~1.5 min)
+## SLIDE 8: A Limitação da Reta e a Necessidade do MLP (Tempo: ~2 min)
 
-* **Título do Slide:** Discussão Teórica: Separação Linear vs MLP
+* **Título do Slide:** Discussão Teórica: A Limitação da Reta e a Solução com MLP
 * **Tópicos no Slide:**
-  - **O Perceptron é perfeito aqui porque:** O problema é linearmente separável (uma reta divide o plano).
-  - **Limitação histórica (Minsky & Papert, 1969):** O Perceptron falha no problema do XOR (não-linear).
-  - **Quando precisaríamos do Perceptron Multicamadas (MLP)?**
-    - Se houvesse tipos de terreno, poções no inventário ou zonas circulares de perigo.
-    - O MLP resolveria com camadas ocultas (*hidden layers*) e *Backpropagation*.
+  - **O Perceptron Simples resolveu o meme:** Perto e com pouca vida, o NPC foge com sucesso.
+  - **A Descoberta da Limitação (O Efeito 'Vai e Volta'):**
+    - A reta de decisão é infinita e inclinada.
+    - Se o NPC fugir para longe (> 20m), a reta volta a dar sinal positivo para "Atacar".
+    - Inimigos corpo a corpo andariam para frente até se aproximar, assustar e fugir de novo, gerando um loop de oscilação!
+  - **Por que o Perceptron Simples não resolve isso sozinho?** Porque ele está preso à separação linear (uma única linha reta).
+  - **Como o Perceptron Multicamadas (MLP) resolve?**
+    - O MLP possui camadas ocultas e funções não-lineares, permitindo criar **fronteiras em curva ou em 'L'**.
+    - Podemos definir uma regra fechada: *"Com menos de 20% de vida, FOGE SEMPRE, não importa a distância!"*, eliminando o loop.
 * **O que você fala:**
-  > *"Para fechar a parte teórica: por que não usamos um Perceptron Multicamadas (MLP)? Porque em engenharia de IA, a regra de ouro é: use a solução mais simples que resolve o problema com perfeição (Navalha de Occam). Como a relação entre vida e distância forma duas regiões contínuas separadas por uma reta, o Perceptron Simples atinge 100% de acurácia com custo computacional mínimo, ideal para rodar em tempo real em jogos com centenas de inimigos simultâneos."*
+  > *"Professor e turma, chegamos ao ponto alto da nossa análise crítica:*  
+  > *O Perceptron Simples resolveu com perfeição o problema do meme de Skyrim: com 10% de vida colado no jogador, o inimigo recua.*  
+  > 
+  > *Porém, descobrimos uma limitação lógica muito interessante: como a reta do Perceptron é infinita e inclinada, se o bandido fugir e ficar muito longe (mais de 20 metros), a reta volta a dar sinal para 'Atacar'. Se for um inimigo de espada, ele correria em direção ao jogador de novo, até se aproximar, cruzar a linha e fugir outra vez, gerando um **loop de oscilação ('vai e volta')**!*  
+  > 
+  > *E é exatamente essa limitação da reta que justifica a criação do **Perceptron Multicamadas (MLP)**! Com o MLP e suas camadas ocultas, a fronteira de decisão não precisa ser uma reta: ela pode ser uma **curva ou um formato em 'L'**, definindo que com vida crítica o NPC foge para sempre, independentemente da distância!"*
 
 ---
 
 ## SLIDE 9: Conclusão & Perguntas (Tempo: ~1.5 min)
 
-* **Título do Slide:** Conclusão & Agradecimentos
+* **Título do Slide:** Conclusão & Considerações Finais
 * **Tópicos no Slide:**
-  - O Perceptron Simples continua relevante 68 anos após sua criação.
-  - Baixíssimo custo computacional, ideal para lógica de jogos.
-  - Código implementado do zero e validado no Scikit-Learn.
-  - Dúvidas ou perguntas?
+  - O Perceptron Simples continua sendo a base fundamental e mais rápida para IA em tempo real.
+  - Resolve com precisão o problema da autopreservação básica em jogos.
+  - Implementação validada tanto do zero quanto no Scikit-Learn.
+  - Compreensão clara de suas fronteiras e de quando migrar para o MLP.
 * **O que você fala:**
-  > *"Concluímos que um modelo clássico de 1958 ainda é extremamente prático e eficiente para resolver problemas reais de tomada de decisão. O código completo e a comparação com Scikit-Learn comprovam sua eficácia. Muito obrigado a todos pela atenção, e agora estou aberto às perguntas do professor e dos colegas!"*
+  > *"Para concluir: vimos que o Perceptron Simples de 1958 é uma ferramenta incrível, rápida e eficiente para tomada de decisão em tempo real. Conseguimos resolver o meme do Skyrim com custo computacional mínimo e, ao mesmo tempo, entendemos na prática por que a ciência precisou evoluir para o Perceptron Multicamadas quando os problemas exigem fronteiras não-lineares.  
+  > Muito obrigado pela atenção de todos, e agora estou aberto para as dúvidas do professor!"*
 
 ---
 
 ## 🛡️ Dicas de Ouro para Perguntas do Professor (Colinha de Respostas)
 
-* **Pergunta 1:** *"Por que você normalizou os dados dividindo por 100 e por 30?"*
+* **Pergunta Crucial:** *"Se o Perceptron Multicamadas (MLP) resolve esse problema do loop 100%, por que você escolheu implementar o Perceptron Simples?"*
+  - **Sua Resposta de Ouro:**
+    > *"Professor, essa foi uma escolha deliberada de **engenharia de software e performance de jogos**:*  
+    > 1. ***Custo Computacional a 60 FPS (Navalha de Occam):** Em um jogo de RPG de mundo aberto como Skyrim, não temos apenas 1 NPC; temos centenas de inimigos rodando simultaneamente com física, animações e renderização. O Perceptron Simples tem complexidade $O(1)$ — são apenas 2 multiplicações e 1 soma! O MLP exigiria calcular matrizes e funções sigmoides/ReLU para múltiplos neurônios ocultos, sendo um 'canhão para matar uma mosca' em uma decisão binária básica.*  
+    > 2. ***Explicabilidade e Calibração (Caixa Branca vs Caixa Preta):** O Perceptron Simples é transparente. Qualquer game designer consegue ajustar os pesos e entender exatamente onde a reta está cortando no mapa. O MLP é uma caixa preta muito mais difícil de calibrar e depurar se o NPC tiver um comportamento estranho.*  
+    > 3. ***Metodologia de Engenharia:** Em IA, a boa prática é sempre começar pelo modelo base mais simples e leve (baseline). Ao implementar o Perceptron Simples, resolvemos o meme do bandido suicida e identificamos com precisão o limite da separabilidade linear, o que nos dá a base teórica perfeita para justificar o MLP apenas quando for estritamente necessário!"*
+
+* **Pergunta 2:** *"Por que você normalizou os dados dividindo por 100 e por 30?"*
   - **Sua Resposta:** *"Porque a vida varia de 0 a 100 e a distância de 0 a 30. Se não normalizarmos, a vida atualizaria os pesos 3 vezes mais rápido que a distância, desestabilizando o treino. Deixando ambas entre 0 e 1, o aprendizado converge suavemente em poucas épocas."*
-* **Pergunta 2:** *"Qual a diferença entre o Perceptron e o Adaline?"*
-  - **Sua Resposta:** *"O Perceptron calcula o erro depois da função degrau (saída discreta 0 ou 1). O Adaline calcula o erro antes da função degrau, usando a saída contínua e a descida do gradiente no Erro Quadrático Médio (MSE)."*
-* **Pergunta 3:** *"E se a taxa de aprendizado for muito alta ou muito baixa?"*
-  - **Sua Resposta:** *"Se for alta demais, os pesos podem oscilar em volta da reta sem convergir. Se for muito baixa, o treino demora muito mais épocas para atingir zero erros. O valor 0.1 se mostrou ideal para os nossos dados."*
+
+* **Pergunta 3:** *"Qual a diferença entre o Perceptron e o Adaline?"*
+  - **Sua Resposta:** *"O Perceptron calcula o erro depois da função degrau (saída discreta 0 ou 1). O Adaline calcula o erro antes da função degrau, usando a saída contínua e a descida do gradiente no Erro Quadrático Médio (MSE). Ambos continuam restritos a uma reta linear."*
+
+* **Pergunta 4:** *"E os dados aleatórios que comentei na aula?"*
+  - **Sua Resposta:** *"Incluímos no código o **Modo 2**: ao gerar 80 inimigos aleatórios com ruído de personalidade (covardia e fúria), a acurácia cai para cerca de 91% e o Perceptron comete 7 erros inevitáveis, comprovando na prática o Teorema da Convergência do Perceptron — nenhuma reta perfeita consegue separar dados com sobreposição!"*
 
