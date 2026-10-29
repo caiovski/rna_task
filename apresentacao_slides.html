@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apresentação IA - Perceptron Simples em Jogos de RPG</title>
+    <style>
+        :root {
+            --bg-color: #0f141c;
+            --card-bg: #1a2230;
+            --accent-blue: #3498db;
+            --accent-green: #2ecc71;
+            --accent-red: #e74c3c;
+            --accent-gold: #f1c40f;
+            --text-main: #ecf0f1;
+            --text-muted: #95a5a6;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Container do Slide */
+        .slide-container {
+            width: 90vw;
+            max-width: 1100px;
+            height: 80vh;
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            display: none;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 45px 55px;
+            position: relative;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .slide-container.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Cabeçalho do Slide */
+        .slide-header {
+            border-bottom: 2px solid rgba(52, 152, 219, 0.3);
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+
+        .slide-header h2 {
+            font-size: 2rem;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .slide-header .tag {
+            font-size: 0.85rem;
+            background: rgba(52, 152, 219, 0.2);
+            color: var(--accent-blue);
+            padding: 4px 10px;
+            border-radius: 6px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: bold;
+        }
+
+        /* Conteúdo do Slide */
+        .slide-body {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            font-size: 1.25rem;
+            line-height: 1.6;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            align-items: center;
+        }
+
+        ul {
+            list-style: none;
+        }
+
+        li {
+            margin-bottom: 16px;
+            position: relative;
+            padding-left: 30px;
+        }
+
+        li::before {
+            content: "▶";
+            position: absolute;
+            left: 0;
+            color: var(--accent-blue);
+            font-size: 0.9rem;
+            top: 4px;
+        }
+
+        .highlight {
+            color: var(--accent-gold);
+            font-weight: bold;
+        }
+
+        .formula-box {
+            background: rgba(0, 0, 0, 0.4);
+            border-left: 4px solid var(--accent-blue);
+            padding: 18px 24px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-family: 'Consolas', monospace;
+            font-size: 1.2rem;
+        }
+
+        .alert-box {
+            background: rgba(231, 76, 60, 0.15);
+            border-left: 4px solid var(--accent-red);
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+
+        .success-box {
+            background: rgba(46, 204, 113, 0.15);
+            border-left: 4px solid var(--accent-green);
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+
+        /* Imagem do Gráfico */
+        .img-container {
+            text-align: center;
+        }
+
+        .img-container img {
+            max-width: 100%;
+            max-height: 380px;
+            border-radius: 10px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+
+        /* Rodapé / Barra de Navegação */
+        .slide-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            padding-top: 15px;
+            font-size: 0.95rem;
+            color: var(--text-muted);
+        }
+
+        .nav-controls {
+            display: flex;
+            gap: 15px;
+        }
+
+        button {
+            background: #243042;
+            color: white;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            background: var(--accent-blue);
+        }
+
+        .progress-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 5px;
+            background: var(--accent-blue);
+            transition: width 0.3s ease;
+            border-radius: 0 0 0 16px;
+        }
+
+        /* Tela de Título Especial */
+        .title-slide {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .title-slide h1 {
+            font-size: 2.8rem;
+            color: #ffffff;
+            line-height: 1.2;
+        }
+
+        .title-slide p {
+            font-size: 1.3rem;
+            color: var(--text-muted);
+        }
+
+        /* =========================================================
+           CONFIGURAÇÃO PARA IMPRESSÃO / SALVAR EM PDF (Ctrl + P)
+           ========================================================= */
+        @media print {
+            @page {
+                size: landscape;
+                margin: 0;
+            }
+
+            html, body {
+                background-color: #0f141c !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                color-adjust: exact !important;
+                overflow: visible !important;
+                height: auto !important;
+                display: block !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+
+            .slide-container {
+                display: flex !important;
+                page-break-after: always !important;
+                break-after: page !important;
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+                width: 100vw !important;
+                height: 100vh !important;
+                max-width: 100vw !important;
+                max-height: 100vh !important;
+                border-radius: 0 !important;
+                box-shadow: none !important;
+                border: none !important;
+                padding: 45px 65px !important;
+                margin: 0 !important;
+                box-sizing: border-box !important;
+                background-color: #1a2230 !important;
+            }
+
+            .slide-container:last-of-type {
+                page-break-after: avoid !important;
+                break-after: avoid !important;
+            }
+
+            .slide-footer span:first-child,
+            .progress-bar,
+            .nav-controls {
+                display: none !important;
+            }
+
+            .img-container img {
+                max-height: 380px !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- SLIDE 1: CAPA -->
+    <div class="slide-container active" id="slide-1">
+        <div class="slide-body title-slide">
+            <span class="tag" style="font-size: 1rem; padding: 6px 14px; background: rgba(52, 152, 219, 0.2); color: var(--accent-blue); border-radius: 20px;">Inteligência Artificial I</span>
+            <h1>IA de Sobrevivência para NPCs em RPGs</h1>
+            <p>Tomada de Decisão com <span class="highlight">Perceptron Simples</span> de Rosenblatt</p>
+            <div style="margin-top: 30px; font-size: 1.1rem; color: #cbd5e1;">
+                <strong>Apresentação Prática &bull; 15 Minutos</strong><br>
+                Implementação Artesanal + Validação com Scikit-Learn
+            </div>
+        </div>
+        <div class="slide-footer">
+            <span>Use as setas &larr; &rarr; do teclado para navegar</span>
+            <span class="slide-num">Slide 1 de 9</span>
+        </div>
+        <div class="progress-bar" style="width: 11%;"></div>
+    </div>
+
+    <!-- SLIDE 2: O PROBLEMA -->
+    <div class="slide-container" id="slide-2">
+        <div class="slide-header">
+            <span class="tag">Contexto & Motivação</span>
+            <h2>O Problema: O Famoso Meme do Skyrim</h2>
+        </div>
+        <div class="slide-body grid-2">
+            <div>
+                <ul>
+                    <li>Você é o <strong>Dragonborn</strong>, nível 80, armadura lendária e espada colossal.</li>
+                    <li>Surge um bandido com uma adaga enferrujada e <span class="highlight">5% de HP</span> gritando: <em>"Never should have come here!"</em>.</li>
+                    <li>Ele corre de peito aberto para a morte certa.</li>
+                </ul>
+            </div>
+            <div>
+                <div class="alert-box">
+                    <strong>Por que isso acontece nos jogos?</strong><br>
+                    Scripts rígidos ou árvores de decisão simples com <code>if/else</code> manuais ignoram o contexto de sobrevivência (vida vs proximidade da ameaça).
+                </div>
+                <div class="success-box">
+                    <strong>Nossa Missão:</strong><br>
+                    Criar um instinto de <span class="highlight">Luta ou Fuga (Fight or Flight)</span> que aprende quando é hora de recuar!
+                </div>
+            </div>
+        </div>
+        <div class="slide-footer">
+            <span>Disciplina de Inteligência Artificial I</span>
+            <span class="slide-num">Slide 2 de 9</span>
+        </div>
+        <div class="progress-bar" style="width: 22%;"></div>
+    </div>
+
+    <!-- SLIDE 3: A SOLUÇÃO -->
+    <div class="slide-container" id="slide-3">
+        <div class="slide-header">
+            <span class="tag">Modelagem do Problema</span>
+            <h2>O Módulo de Sobrevivência</h2>
+        </div>
+        <div class="slide-body">
+            <p style="margin-bottom: 25px;">Definimos duas entradas vitais para a tomada de decisão do NPC:</p>
+            <div class="grid-2">
+                <div class="formula-box">
+                    <strong>Entrada 1 (x₁):</strong> Vida do Inimigo (0% a 100%)<br>
+                    <strong>Entrada 2 (x₂):</strong> Distância até o Jogador (0m a 30m)
+                </div>
+                <div class="formula-box">
+                    <strong>Saída Decidida (y):</strong><br>
+                    <span style="color: var(--accent-red); font-weight: bold;">0 = FUGIR / RECUAR</span> (Buscar cobertura)<br>
+                    <span style="color: var(--accent-green); font-weight: bold;">1 = ATACAR / LUTAR</span> (Ir para o combate)
+                </div>
+            </div>
+            <p style="margin-top: 20px; color: var(--text-muted); font-size: 1.1rem;">
+                O Perceptron encontrará automaticamente a linha de equilíbrio que separa o momento seguro de lutar da necessidade vital de fugir.
+            </p>
+        </div>
+        <div class="slide-footer">
+            <span>Disciplina de Inteligência Artificial I</span>
+            <span class="slide-num">Slide 3 de 9</span>
+        </div>
+        <div class="progress-bar" style="width: 33%;"></div>
+    </div>
+
+    <!-- SLIDE 4: O MODELO -->
+    <div class="slide-container" id="slide-4">
+        <div class="slide-header">
+            <span class="tag">Fundamentação Teórica</span>
+            <h2>O Perceptron de Rosenblatt (1958)</h2>
+        </div>
+        <div class="slide-body grid-2">
+            <div>
+                <ul>
+                    <li>O modelo pioneiro e bloco construtor de todas as redes neurais.</li>
+                    <li><strong>Soma Ponderada:</strong> Cada entrada recebe um peso de importância:</li>
+                </ul>
+                <div class="formula-box">
+                    Soma = (Vida &bull; w₁) + (Distância &bull; w₂) + bias
+                </div>
+                <ul>
+                    <li><strong>Função Degrau (Ativação):</strong></li>
+                </ul>
+                <div class="formula-box">
+                    Se Soma &ge; 0 &rarr; 1 (Atacar)<br>
+                    Se Soma &lt; 0 &rarr; 0 (Fugir)
+                </div>
+            </div>
+            <div>
+                <div class="success-box">
+                    <strong>Intuição Biológica:</strong><br>
+                    Funciona exatamente como um interruptor ou potencial de ação biológico: só dispara quando os estímulos ponderados superam o limiar (bias).
+                </div>
+            </div>
+        </div>
+        <div class="slide-footer">
+            <span>Disciplina de Inteligência Artificial I</span>
+            <span class="slide-num">Slide 4 de 9</span>
+        </div>
+        <div class="progress-bar" style="width: 44%;"></div>
+    </div>
+
+    <!-- SLIDE 5: A MATEMÁTICA -->
+    <div class="slide-container" id="slide-5">
+        <div class="slide-header">
+            <span class="tag">Aprendizado Simples</span>
+            <h2>Como o Perceptron Aprende? (Sem Derivadas!)</h2>
+        </div>
+        <div class="slide-body">
+            <p>Diferente de redes neurais complexas, o aprendizado do Perceptron é puramente aritmético:</p>
+            <div class="grid-2" style="margin-top: 20px;">
+                <div>
+                    <div class="formula-box">
+                        <strong>1. Cálculo do Erro:</strong><br>
+                        Erro = y_real - y_previsto<br>
+                        <small>(O resultado só pode ser 0, +1 ou -1)</small>
+                    </div>
+                    <div class="formula-box">
+                        <strong>2. Atualização dos Pesos:</strong><br>
+                        w_novo = w_antigo + (&eta; &bull; Erro &bull; x)<br>
+                        bias_novo = bias_antigo + (&eta; &bull; Erro)
+                    </div>
+                </div>
+                <div>
+                    <ul>
+                        <li><strong>Se acertou (Erro = 0):</strong> Nada se altera.</li>
+                        <li><strong>Se deveria fugir mas atacou (Erro = -1):</strong> Os pesos são reduzidos.</li>
+                        <li><strong>Se deveria atacar mas fugiu (Erro = +1):</strong> Os pesos são aumentados.</li>
+                    </ul>
+                    <div class="success-box">
+                        Zero derivadas parciais, zero matrizes complexas! Apenas soma e multiplicação.
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="slide-footer">
+            <span>Disciplina de Inteligência Artificial I</span>
+            <span class="slide-num">Slide 5 de 9</span>
+        </div>
+        <div class="progress-bar" style="width: 55%;"></div>
+    </div>
+
+    <!-- SLIDE 6: DEMONSTRAÇÃO CÓDIGO -->
+    <div class="slide-container" id="slide-6">
+        <div class="slide-header">
+            <span class="tag">Demonstração Prática</span>
+            <h2>Implementação: Do Zero vs Scikit-Learn</h2>
+        </div>
+        <div class="slide-body grid-2">
+            <div>
+                <ul>
+                    <li>Construído do zero em <strong>Python puro</strong> e validado no <strong>Scikit-Learn</strong>.</li>
+                    <li><strong>Alternância de Modos:</strong>
+                        <br>&bull; <span class="highlight">Modo 1 (Fixos):</span> 100% de acerto na época 5.
+                        <br>&bull; <span class="highlight">Modo 2 (Aleatórios):</span> O Perceptron erra mais (~90%), ilustrando o efeito do ruído!
+                    </li>
+                    <li><strong>Modo Interativo:</strong> Permite testar valores ao vivo com o professor!</li>
+                </ul>
+                <div class="formula-box" style="font-size: 0.95rem;">
+                    <strong>Modo 1:</strong> 14/14 acertos (100% acurácia)<br>
+                    <strong>Modo 2:</strong> 73/80 acertos (91.2% acurácia - erros inevitáveis)
+                </div>
+            </div>
+            <div>
+                <div class="success-box">
+                    <strong>Hora de rodar o código ao vivo:</strong><br><br>
+                    <code>python ia_skyrim_perceptron.py</code><br><br>
+                    Podemos escolher entre os dados fixos e os aleatórios com um toque!
+                </div>
+            </div>
+        </div>
+        <div class="slide-footer">
+            <span>Disciplina de Inteligência Artificial I</span>
+            <span class="slide-num">Slide 6 de 9</span>
+        </div>
+        <div class="progress-bar" style="width: 66%;"></div>
+    </div>
+
+    <!-- SLIDE 7: O GRÁFICO -->
+    <div class="slide-container" id="slide-7">
+        <div class="slide-header">
+            <span class="tag">Resultado Visual</span>
+            <h2>A Fronteira de Decisão: A Reta que Salva o NPC</h2>
+        </div>
+        <div class="slide-body grid-2">
+            <div class="img-container">
+                <img src="grafico_skyrim.png" alt="Gráfico da Fronteira de Decisão">
+            </div>
+            <div>
+                <ul>
+                    <li><strong style="color: var(--accent-red);">Zona Vermelha:</strong> Situação crítica &rarr; <strong>FUGIR!</strong></li>
+                    <li><strong style="color: var(--accent-green);">Zona Verde:</strong> Vantagem tática &rarr; <strong>ATACAR!</strong></li>
+                    <li><strong style="color: var(--accent-blue);">Linha Azul:</strong> Fronteira do nosso <strong>Modelo do Zero</strong>.</li>
+                    <li><strong style="color: #e67e22;">Linha Laranja:</strong> Fronteira do <strong>Scikit-Learn</strong> (validação).</li>
+                    <li><strong style="color: var(--accent-gold);">Estrela Dourada:</strong> Bandido do Skyrim (10% HP, 2m) &rarr; <strong>FOGE!</strong></li>
+                    <li><strong style="color: #9b59b6;">Triângulo Roxo:</strong> Arqueiro (15% HP, 28m) &rarr; <strong>ATACA!</strong></li>
+                </ul>
+            </div>
+        </div>
+        <div class="slide-footer">
+            <span>Disciplina de Inteligência Artificial I</span>
+            <span class="slide-num">Slide 7 de 9</span>
+        </div>
+        <div class="progress-bar" style="width: 77%;"></div>
+    </div>
+
+    <!-- SLIDE 8: DISCUSSÃO TEÓRICA -->
+    <div class="slide-container" id="slide-8">
+        <div class="slide-header">
+            <span class="tag">Discussão Crítica</span>
+            <h2>Por que o Perceptron Simples e não o MLP?</h2>
+        </div>
+        <div class="slide-body grid-2">
+            <div>
+                <div class="success-box">
+                    <strong>Por que o Perceptron foi ideal aqui?</strong><br>
+                    O problema de vida vs distância é <strong>linearmente separável</strong>. Uma única reta resolve 100% dos casos com custo computacional quase nulo em tempo real!
+                </div>
+            </div>
+            <div>
+                <div class="alert-box">
+                    <strong>Quando precisaríamos de um MLP?</strong><br>
+                    Se o problema fosse <strong>não-linear</strong> (ex: perigo em áreas circulares, poções no inventário, problema do XOR histórico de Minsky & Papert).<br>
+                    Aí seriam necessárias camadas ocultas e <em>Backpropagation</em>.
+                </div>
+            </div>
+        </div>
+        <div class="slide-footer">
+            <span>Disciplina de Inteligência Artificial I</span>
+            <span class="slide-num">Slide 8 de 9</span>
+        </div>
+        <div class="progress-bar" style="width: 88%;"></div>
+    </div>
+
+    <!-- SLIDE 9: CONCLUSÃO -->
+    <div class="slide-container" id="slide-9">
+        <div class="slide-body title-slide">
+            <span class="tag" style="background: rgba(46, 204, 113, 0.2); color: var(--accent-green);">Conclusão</span>
+            <h1>Muito Obrigado!</h1>
+            <p>O Perceptron Simples de 1958 ainda é uma solução elegante, didática e viável para IA de jogos.</p>
+            <div class="formula-box" style="margin-top: 30px; font-size: 1.2rem;">
+                Perguntas, dúvidas ou comentários da banca?
+            </div>
+        </div>
+        <div class="slide-footer">
+            <span>Fim da Apresentação</span>
+            <span class="slide-num">Slide 9 de 9</span>
+        </div>
+        <div class="progress-bar" style="width: 100%;"></div>
+    </div>
+
+    <!-- SCRIPT DE NAVEGAÇÃO -->
+    <script>
+        let currentSlide = 1;
+        const totalSlides = 9;
+
+        function showSlide(index) {
+            if (index < 1 || index > totalSlides) return;
+            document.querySelectorAll('.slide-container').forEach(el => el.classList.remove('active'));
+            document.getElementById(`slide-${index}`).classList.add('active');
+            currentSlide = index;
+        }
+
+        function nextSlide() {
+            if (currentSlide < totalSlides) showSlide(currentSlide + 1);
+        }
+
+        function prevSlide() {
+            if (currentSlide > 1) showSlide(currentSlide - 1);
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === 'Space') nextSlide();
+            if (e.key === 'ArrowLeft') prevSlide();
+            if (e.key === 'f' || e.key === 'F') {
+                if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+                else document.exitFullscreen();
+            }
+        });
+    </script>
+</body>
+</html>
+
